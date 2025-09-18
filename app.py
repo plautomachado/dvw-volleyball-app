@@ -166,6 +166,105 @@ def get_match(match_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/matches/<int:match_id>/general_stats", methods=["GET"])
+def get_general_stats(match_id):
+    try:
+        match = Match.query.get_or_404(match_id)
+        stats_data = json.loads(match.stats_data) if match.stats_data else {}
+        sets_data = json.loads(match.sets_data) if match.sets_data else []
+
+        home_score = sum(1 for s in sets_data if s.get('winner') == 'home')
+        away_score = sum(1 for s in sets_data if s.get('winner') == 'away')
+
+        response = {
+            "match_id": match.id,
+            "home_team": match.home_team,
+            "away_team": match.away_team,
+            "final_score": f"{home_score}-{away_score}",
+            "home_stats": stats_data.get('home_team', {}),
+            "away_stats": stats_data.get('away_team', {})
+        }
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/matches/<int:match_id>/fundamentals_analysis", methods=["GET"])
+def get_fundamentals_analysis(match_id):
+    try:
+        match = Match.query.get_or_404(match_id)
+        stats_data = json.loads(match.stats_data) if match.stats_data else {}
+        players_data = json.loads(match.players_data) if match.players_data else []
+
+        fundamentals = {
+            "attack": [],
+            "block": [],
+            "serve": [],
+            "dig": []
+        }
+
+        # Process player stats for fundamentals
+        for player_stat in stats_data.get('players', []):
+            player_id = player_stat.get('playerId')
+            player_info = next((p for p in players_data if str(p.get('playerId')) == str(player_id)), None)
+            
+            if player_info:
+                player_name = player_info.get('name', 'Unknown')
+                player_team_type = player_info.get('team_type', 'Unknown')
+            else:
+                player_name = 'Unknown'
+                player_team_type = 'Unknown'
+
+            # Attack
+            attacks_str = player_stat.get('attacks', '0/0')
+            if isinstance(attacks_str, str) and '/' in attacks_str:
+                kills, attempts = map(int, attacks_str.split('/'))
+                efficiency = f"{(kills / attempts * 100):.2f}%" if attempts > 0 else "0.00%"
+            else:
+                kills = 0
+                attempts = 0
+                efficiency = "0.00%"
+
+            fundamentals["attack"].append({
+                "player_id": player_id,
+                "name": player_name,
+                "team": player_team_type,
+                "attempts": attempts,
+                "kills": kills,
+                "efficiency": efficiency
+            })
+
+            # Block
+            fundamentals["block"].append({
+                "player_id": player_id,
+                "name": player_name,
+                "team": player_team_type,
+                "blocks": player_stat.get('blocks', 0)
+            })
+
+            # Serve
+            fundamentals["serve"].append({
+                "player_id": player_id,
+                "name": player_name,
+                "team": player_team_type,
+                "serves": player_stat.get('serves', 0)
+            })
+
+            # Dig
+            fundamentals["dig"].append({
+                "player_id": player_id,
+                "name": player_name,
+                "team": player_team_type,
+                "digs": player_stat.get('digs', 0)
+            })
+
+        response = {
+            "match_id": match.id,
+            "fundamentals": fundamentals
+        }
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/health", methods=["GET"])
 def health_check():
     return jsonify({"status": "healthy", "timestamp": datetime.utcnow().isoformat()})
