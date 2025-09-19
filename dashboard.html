@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Avançado - Análise de Voleibol</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .navbar {
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-home { color: var(--accent); }
+        .stat-away { color: var(--secondary); }
+        
+        .team-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .badge-home {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .badge-away {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        
+        .player-card {
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .player-card:hover {
+            transform: translateX(5px);
+        }
+        
+        .performance-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #ecf0f1;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        
+        .performance-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 12px 20px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            border-bottom: 3px solid var(--accent);
+            color: var(--primary);
+            background: transparent;
+        }
+        
+        .match-card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .match-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .set-score {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .set-win {
+            background: var(--success);
+            color: white;
+        }
+        
+        .set-loss {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-volleyball-ball me-2"></i>
+                <strong>DVW Analytics</strong> - Dashboard Avançado
+            </a>
+            <div class="ms-auto">
+                <span class="navbar-text">
+                    <i class="fas fa-database me-1"></i>
+                    <span id="matchesCount">0</span> partidas analisadas
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Header Stats -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="glass-card stat-card">
+                    <div class="stat-number stat-home" id="totalHomePoints">0</div>
+                    <div class="stat-label">Pontos Time da Casa</div>
+                    <div class="mt-2">
+                        <span class="team-badge badge-home" id="homeTeamName">Time A</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card stat-card">
+                    <div class="stat-number text-dark" id="totalMatches">0</div>
+                    <div class="stat-label">Partidas Analisadas</div>
+                    <div class="mt-2">
+                        <i class="fas fa-volleyball-ball fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card stat-card">
+                    <div class="stat-number stat-away" id="totalAwayPoints">0</div>
+                    <div class="stat-label">Pontos Time Visitante</div>
+                    <div class="mt-2">
+                        <span class="team-badge badge-away" id="awayTeamName">Time B</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="glass-card">
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">Visão Geral</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="players-tab" data-bs-toggle="tab" data-bs-target="#players" type="button" role="tab">Jogadores</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="matches-tab" data-bs-toggle="tab" data-bs-target="#matches" type="button" role="tab">Partidas</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button" role="tab">Análise</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content pt-4" id="dashboardTabsContent">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="glass-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Comparação de Equipes</h5>
+                                        <div class="chart-container">
+                                            <canvas id="teamComparisonChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="glass-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Distribuição de Ações</h5>
+                                        <div class="chart-container">
+                                            <canvas id="actionDistributionChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="glass-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Evolução por Set</h5>
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="setsTimelineChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Players Tab -->
+                    <div class="tab-pane fade" id="players" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="glass-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Time da Casa</h5>
+                                        <div id="homePlayersList">
+                                            <!-- Jogadores serão inseridos aqui -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="glass-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Time Visitante</h5>
+                                        <div id="awayPlayersList">
+                                            <!-- Jogadores serão inseridos aqui -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="glass-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Performance dos Jogadores</h5>
+                                        <div class="chart-container">
+                                            <canvas id="playersPerformanceChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matches Tab -->
+                    <div class="tab-pane fade" id="matches" role="tabpanel">
+                        <div class="row" id="matchesList">
+                            <!-- Partidas serão inseridas aqui -->
+                        </div>
+                    </div>
+
+                    <!-- Analysis Tab -->
+                    <div class="tab-pane fade" id="analysis" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="glass-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Eficiência de Ataque</h5>
+                                        <div class="chart-container">
+                                            <canvas id="attackEfficiencyChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="glass-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Zonas de Ataque</h5>
+                                        <div class="chart-container">
+                                            <canvas id="attackZonesChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="glass-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Análise Tática</h5>
+                                        <div id="tacticalAnalysis">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6>Pontos Fortes</h6>
+                                                    <ul class="list-group" id="strengthsList">
+                                                        <!-- Análise será inserida aqui -->
+                                                    </ul>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>Áreas para Melhoria</h6>
+                                                    <ul class="list-group" id="improvementsList">
+                                                        <!-- Análise será inserida aqui -->
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // URL da sua API
+        const API_BASE_URL = 'https://dvw-backend.onrender.com/api';
+        
+        // Variáveis globais
+        let matchesData = [];
+        let charts = {};
+
+        // Inicializar dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMatchesData();
+            setInterval(loadMatchesData, 30000); // Atualizar a cada 30 segundos
+        });
+
+        // Carregar dados da API
+        async function loadMatchesData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/matches`);
+                matchesData = await response.json();
+                
+                updateDashboard();
+                updateCharts();
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            }
+        }
+
+        // Atualizar estatísticas do dashboard
+        function updateDashboard() {
+            if (matchesData.length === 0) return;
+            
+            const latestMatch = matchesData[0];
+            const stats = latestMatch.stats_data;
+            
+            // Atualizar contadores
+            document.getElementById('matchesCount').textContent = matchesData.length;
+            document.getElementById('totalMatches').textContent = matchesData.length;
+            document.getElementById('totalHomePoints').textContent = stats.home_team.points;
+            document.getElementById('totalAwayPoints').textContent = stats.away_team.points;
+            document.getElementById('homeTeamName').textContent = latestMatch.home_team;
+            document.getElementById('awayTeamName').textContent = latestMatch.away_team;
+            
+            // Atualizar lista de partidas
+            updateMatchesList();
+            
+            // Atualizar lista de jogadores
+            updatePlayersList();
+        }
+
+        // Atualizar gráficos
+        function updateCharts() {
+            if (matchesData.length === 0) return;
+            
+            const latestMatch = matchesData[0];
+            const stats = latestMatch.stats_data;
+            
+            // Gráfico de comparação de equipes
+            createTeamComparisonChart(stats);
+            
+            // Gráfico de distribuição de ações
+            createActionDistributionChart(stats);
+            
+            // Gráfico de evolução por set
+            createSetsTimelineChart(latestMatch.sets_data);
+            
+            // Gráfico de performance dos jogadores
+            createPlayersPerformanceChart(stats.players);
+            
+            // Gráficos de análise
+            createAttackEfficiencyChart(stats);
+            createAttackZonesChart();
+            
+            // Análise tática
+            createTacticalAnalysis(stats);
+        }
+
+        // Implementar funções de criação de gráficos (exemplos)
+        function createTeamComparisonChart(stats) {
+            const ctx = document.getElementById('teamComparisonChart').getContext('2d');
+            
+            if (charts.teamComparison) {
+                charts.teamComparison.destroy();
+            }
+            
+            charts.teamComparison = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pontos', 'Ataques', 'Bloqueios', 'Saques', 'Defesas', 'Erros'],
+                    datasets: [
+                        {
+                            label: 'Time da Casa',
+                            data: [
+                                stats.home_team.points,
+                                stats.home_team.attacks,
+                                stats.home_team.blocks,
+                                stats.home_team.serves,
+                                stats.home_team.digs,
+                                stats.home_team.errors
+                            ],
+                            backgroundColor: '#3498db',
+                        },
+                        {
+                            label: 'Time Visitante',
+                            data: [
+                                stats.away_team.points,
+                                stats.away_team.attacks,
+                                stats.away_team.blocks,
+                                stats.away_team.serves,
+                                stats.away_team.digs,
+                                stats.away_team.errors
+                            ],
+                            backgroundColor: '#e74c3c',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Implementar outras funções de gráficos de forma similar...
+        // [As outras funções de criação de gráficos seriam implementadas aqui]
+
+        // Funções para atualizar listas
+        function updateMatchesList() {
+            const matchesList = document.getElementById('matchesList');
+            matchesList.innerHTML = '';
+            
+            matchesData.forEach(match => {
+                const matchCard = `
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="glass-card match-card">
+                            <div class="card-body">
+                                <h6 class="card-title">${match.competition}</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="badge bg-primary">${match.date}</span>
+                                    <span class="badge bg-secondary">${match.time}</span>
+                                </div>
+                                
+                                <div class="text-center mb-3">
+                                    <div class="fw-bold">${match.home_team} vs ${match.away_team}</div>
+                                    <div class="fs-4 fw-bold text-primary">
+                                        ${match.stats_data.home_team.points} - ${match.stats_data.away_team.points}
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-around">
+                                    ${match.sets_data.map(set => `
+                                        <div class="set-score ${set.winner === 'home' ? 'set-win' : 'set-loss'}">
+                                            ${set.home_score}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                matchesList.innerHTML += matchCard;
+            });
+        }
+
+        function updatePlayersList() {
+            // Implementar atualização da lista de jogadores
+        }
+
+        // [Implementar as outras funções de criação de gráficos...]
+
+        // Inicializar tooltips do Bootstrap
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+    </script>
+</body>
+</html>
