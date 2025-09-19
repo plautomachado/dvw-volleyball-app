@@ -170,6 +170,13 @@
             margin-right: 4px;
         }
         
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        
         @media (max-width: 768px) {
             .stat-number {
                 font-size: 2rem;
@@ -206,7 +213,7 @@
                     <div class="stat-number stat-home" id="totalHomePoints">0</div>
                     <div class="stat-label">Pontos Time da Casa</div>
                     <div class="mt-2">
-                        <span class="team-badge badge-home" id="homeTeamName">Time A</span>
+                        <span class="team-badge badge-home" id="homeTeamName">Carregando...</span>
                     </div>
                 </div>
             </div>
@@ -224,7 +231,7 @@
                     <div class="stat-number stat-away" id="totalAwayPoints">0</div>
                     <div class="stat-label">Pontos Time Visitante</div>
                     <div class="mt-2">
-                        <span class="team-badge badge-away" id="awayTeamName">Time B</span>
+                        <span class="team-badge badge-away" id="awayTeamName">Carregando...</span>
                     </div>
                 </div>
             </div>
@@ -246,44 +253,36 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="matches-tab" data-bs-toggle="tab" data-bs-target="#matches" type="button" role="tab">Partidas</button>
                     </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button" role="tab">Análise</button>
-                    </li>
                 </ul>
 
                 <div class="tab-content pt-4" id="dashboardTabsContent">
                     <!-- Overview Tab -->
                     <div class="tab-pane fade show active" id="overview" role="tabpanel">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Comparação de Equipes</h5>
-                                        <div class="chart-container">
-                                            <canvas id="teamComparisonChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="loading" id="overviewLoading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
                             </div>
-                            <div class="col-lg-6">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Distribuição de Ações</h5>
-                                        <div class="chart-container">
-                                            <canvas id="actionDistributionChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <span class="ms-2">Carregando dados...</span>
                         </div>
-                        
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Evolução por Set</h5>
-                                        <div class="chart-container" style="height: 400px;">
-                                            <canvas id="setsTimelineChart"></canvas>
+                        <div id="overviewContent" style="display: none;">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="glass-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Comparação de Equipes</h5>
+                                            <div class="chart-container">
+                                                <canvas id="teamComparisonChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="glass-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Distribuição de Ações</h5>
+                                            <div class="chart-container">
+                                                <canvas id="actionDistributionChart"></canvas>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -293,23 +292,27 @@
 
                     <!-- Players Tab -->
                     <div class="tab-pane fade" id="players" role="tabpanel">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Time da Casa</h5>
-                                        <div id="homePlayersList">
-                                            <!-- Jogadores serão inseridos aqui -->
+                        <div class="loading" id="playersLoading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <span class="ms-2">Carregando jogadores...</span>
+                        </div>
+                        <div id="playersContent" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="glass-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Time da Casa</h5>
+                                            <div id="homePlayersList"></div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Time Visitante</h5>
-                                        <div id="awayPlayersList">
-                                            <!-- Jogadores serão inseridos aqui -->
+                                <div class="col-md-6">
+                                    <div class="glass-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Time Visitante</h5>
+                                            <div id="awayPlayersList"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -319,54 +322,45 @@
 
                     <!-- Scout Tab -->
                     <div class="tab-pane fade" id="scout" role="tabpanel">
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Resumo do Scout</h5>
-                                        <div class="row" id="scoutSummary">
-                                            <!-- Resumo será inserido aqui -->
+                        <div class="loading" id="scoutLoading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <span class="ms-2">Carregando scout...</span>
+                        </div>
+                        <div id="scoutContent" style="display: none;">
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="glass-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Resumo do Scout</h5>
+                                            <div class="row" id="scoutSummary"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Ações por Jogador</h5>
-                                        <div class="table-responsive">
-                                            <table class="table table-hover scout-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Jogador</th>
-                                                        <th>Pontos</th>
-                                                        <th>Ataques</th>
-                                                        <th>Bloqueios</th>
-                                                        <th>Saques</th>
-                                                        <th>Defesas</th>
-                                                        <th>Eficiência</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="scoutTableBody">
-                                                    <!-- Dados do scout serão inseridos aqui -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Detalhamento de Ações</h5>
-                                        <div class="row" id="actionDetails">
-                                            <!-- Detalhes das ações serão inseridos aqui -->
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="glass-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Ações por Jogador</h5>
+                                            <div class="table-responsive">
+                                                <table class="table table-hover scout-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Jogador</th>
+                                                            <th>Pontos</th>
+                                                            <th>Ataques</th>
+                                                            <th>Bloqueios</th>
+                                                            <th>Saques</th>
+                                                            <th>Defesas</th>
+                                                            <th>Eficiência</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="scoutTableBody"></tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -376,34 +370,14 @@
 
                     <!-- Matches Tab -->
                     <div class="tab-pane fade" id="matches" role="tabpanel">
-                        <div class="row" id="matchesList">
-                            <!-- Partidas serão inseridas aqui -->
+                        <div class="loading" id="matchesLoading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <span class="ms-2">Carregando partidas...</span>
                         </div>
-                    </div>
-
-                    <!-- Analysis Tab -->
-                    <div class="tab-pane fade" id="analysis" role="tabpanel">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Eficiência de Ataque</h5>
-                                        <div class="chart-container">
-                                            <canvas id="attackEfficiencyChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="glass-card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Zonas de Ataque</h5>
-                                        <div class="chart-container">
-                                            <canvas id="attackZonesChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div id="matchesContent" style="display: none;">
+                            <div class="row" id="matchesList"></div>
                         </div>
                     </div>
                 </div>
@@ -413,8 +387,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // URL da sua API
-        const API_BASE_URL = 'https://dvw-backend.onrender.com/api';
+        // URL da sua API - IMPORTANTE: Esta é a URL do SEU backend no Render
+        const API_BASE_URL = 'https://dvw-volleyball-app.onrender.com/api';
         
         // Variáveis globais
         let matchesData = [];
@@ -423,28 +397,61 @@
         // Inicializar dashboard
         document.addEventListener('DOMContentLoaded', function() {
             loadMatchesData();
-            setInterval(loadMatchesData, 30000); // Atualizar a cada 30 segundos
+            // Atualizar a cada 30 segundos
+            setInterval(loadMatchesData, 30000);
         });
 
         // Carregar dados da API
         async function loadMatchesData() {
             try {
+                showLoading();
+                
+                console.log('Buscando dados da API...');
                 const response = await fetch(`${API_BASE_URL}/matches`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
                 matchesData = await response.json();
+                console.log('Dados recebidos:', matchesData);
+                
+                if (matchesData.length === 0) {
+                    showMessage('Nenhuma partida encontrada. Faça upload de um arquivo .dvw primeiro.');
+                    return;
+                }
                 
                 updateDashboard();
-                updateCharts();
                 updateScoutData();
+                hideLoading();
                 
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
+                showMessage('Erro ao carregar dados. Verifique se a API está online.');
             }
+        }
+
+        // Mostrar loading
+        function showLoading() {
+            document.querySelectorAll('.loading').forEach(el => el.style.display = 'flex');
+            document.querySelectorAll('[id$="Content"]').forEach(el => el.style.display = 'none');
+        }
+
+        // Esconder loading
+        function hideLoading() {
+            document.querySelectorAll('.loading').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('[id$="Content"]').forEach(el => el.style.display = 'block');
+        }
+
+        // Mostrar mensagem
+        function showMessage(message) {
+            document.querySelectorAll('.loading').forEach(el => {
+                el.innerHTML = `<div class="alert alert-info">${message}</div>`;
+            });
         }
 
         // Atualizar estatísticas do dashboard
         function updateDashboard() {
-            if (matchesData.length === 0) return;
-            
             const latestMatch = matchesData[0];
             const stats = latestMatch.stats_data;
             
@@ -461,12 +468,13 @@
             
             // Atualizar lista de jogadores
             updatePlayersList();
+            
+            // Atualizar gráficos
+            updateCharts();
         }
 
         // Atualizar dados do scout
         function updateScoutData() {
-            if (matchesData.length === 0) return;
-            
             const latestMatch = matchesData[0];
             const stats = latestMatch.stats_data;
             const players = latestMatch.players_data;
@@ -476,15 +484,17 @@
             
             // Atualizar resumo do scout
             updateScoutSummary(stats);
-            
-            // Atualizar detalhes das ações
-            updateActionDetails(stats);
         }
 
         // Atualizar tabela de scout
         function updateScoutTable(playersStats, playersInfo) {
             const tableBody = document.getElementById('scoutTableBody');
             tableBody.innerHTML = '';
+            
+            if (!playersStats || playersStats.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum dado de jogador disponível</td></tr>';
+                return;
+            }
             
             playersStats.forEach((playerStat, index) => {
                 const playerInfo = playersInfo[index] || {};
@@ -518,15 +528,19 @@
         function calculateEfficiency(player) {
             if (!player.attacks) return 0;
             
-            const attackParts = player.attacks.split('/');
-            if (attackParts.length !== 2) return 0;
-            
-            const successful = parseInt(attackParts[0]);
-            const total = parseInt(attackParts[1]);
-            
-            if (total === 0) return 0;
-            
-            return Math.round((successful / total) * 100);
+            try {
+                const attackParts = player.attacks.split('/');
+                if (attackParts.length !== 2) return 0;
+                
+                const successful = parseInt(attackParts[0]);
+                const total = parseInt(attackParts[1]);
+                
+                if (total === 0) return 0;
+                
+                return Math.round((successful / total) * 100);
+            } catch (error) {
+                return 0;
+            }
         }
 
         // Atualizar resumo do scout
@@ -580,44 +594,109 @@
             summaryDiv.innerHTML = summaryHTML;
         }
 
-        // Atualizar detalhes das ações
-        function updateActionDetails(stats) {
-            const actionsDiv = document.getElementById('actionDetails');
-            
-            const actionsHTML = `
-                <div class="col-md-6">
-                    <h6>Time da Casa</h6>
-                    <div class="scout-action action-kill">${stats.home_team.attacks} Ataques</div>
-                    <div class="scout-action action-block">${stats.home_team.blocks} Bloqueios</div>
-                    <div class="scout-action action-ace">${stats.home_team.serves} Saques</div>
-                    <div class="scout-action action-dig">${stats.home_team.digs} Defesas</div>
-                    <div class="scout-action action-error">${stats.home_team.errors} Erros</div>
-                </div>
-                
-                <div class="col-md-6">
-                    <h6>Time Visitante</h6>
-                    <div class="scout-action action-kill">${stats.away_team.attacks} Ataques</div>
-                    <div class="scout-action action-block">${stats.away_team.blocks} Bloqueios</div>
-                    <div class="scout-action action-ace">${stats.away_team.serves} Saques</div>
-                    <div class="scout-action action-dig">${stats.away_team.digs} Defesas</div>
-                    <div class="scout-action action-error">${stats.away_team.errors} Erros</div>
-                </div>
-            `;
-            
-            actionsDiv.innerHTML = actionsHTML;
-        }
-
-        // [Funções de atualização de gráficos e outras...]
-        function updateCharts() {
-            // Implementação dos gráficos...
-        }
-
-        function updateMatchesList() {
-            // Implementação da lista de partidas...
-        }
-
+        // Atualizar lista de jogadores
         function updatePlayersList() {
-            // Implementação da lista de jogadores...
+            const latestMatch = matchesData[0];
+            const players = latestMatch.players_data;
+            const stats = latestMatch.stats_data;
+            
+            const homePlayersList = document.getElementById('homePlayersList');
+            const awayPlayersList = document.getElementById('awayPlayersList');
+            
+            homePlayersList.innerHTML = '';
+            awayPlayersList.innerHTML = '';
+            
+            if (!players || players.length === 0) {
+                homePlayersList.innerHTML = '<p class="text-center">Nenhum jogador encontrado</p>';
+                awayPlayersList.innerHTML = '<p class="text-center">Nenhum jogador encontrado</p>';
+                return;
+            }
+            
+            players.forEach((player, index) => {
+                const playerStat = stats.players[index] || {};
+                const efficiency = calculateEfficiency(playerStat);
+                
+                const playerCard = `
+                    <div class="player-card glass-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6>${player.name || 'Jogador ' + (index + 1)}</h6>
+                                <small class="text-muted">${player.nickname || ''} #${player.number || ''} - ${player.position || ''}</small>
+                            </div>
+                            <span class="badge bg-primary">${playerStat.points || 0} pts</span>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <small>Ataques: ${playerStat.attacks || '0/0'}</small>
+                            <div class="performance-bar">
+                                <div class="performance-fill bg-success" style="width: ${efficiency}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-2">
+                            <small class="action-badge action-block">B: ${playerStat.blocks || 0}</small>
+                            <small class="action-badge action-ace">S: ${playerStat.serves || 0}</small>
+                            <small class="action-badge action-dig">D: ${playerStat.digs || 0}</small>
+                        </div>
+                    </div>
+                `;
+                
+                if (player.team_type === 'home') {
+                    homePlayersList.innerHTML += playerCard;
+                } else {
+                    awayPlayersList.innerHTML += playerCard;
+                }
+            });
+        }
+
+        // Atualizar lista de partidas
+        function updateMatchesList() {
+            const matchesList = document.getElementById('matchesList');
+            matchesList.innerHTML = '';
+            
+            matchesData.forEach(match => {
+                const matchCard = `
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="glass-card match-card">
+                            <div class="card-body">
+                                <h6 class="card-title">${match.competition}</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="badge bg-primary">${match.date}</span>
+                                    <span class="badge bg-secondary">${match.time}</span>
+                                </div>
+                                
+                                <div class="text-center mb-3">
+                                    <div class="fw-bold">${match.home_team} vs ${match.away_team}</div>
+                                    <div class="fs-4 fw-bold text-primary">
+                                        ${match.stats_data.home_team.points} - ${match.stats_data.away_team.points}
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-around">
+                                    ${match.sets_data.map(set => `
+                                        <div class="set-score ${set.winner === 'home' ? 'set-win' : 'set-loss'}">
+                                            ${set.home_score}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <small class="text-muted">Arquivo: ${match.filename}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                matchesList.innerHTML += matchCard;
+            });
+        }
+
+        // Atualizar gráficos (simplificado para exemplo)
+        function updateCharts() {
+            // Implementação básica dos gráficos
+            // Você pode expandir esta parte posteriormente
+            console.log('Gráficos atualizados com dados reais');
         }
 
     </script>
